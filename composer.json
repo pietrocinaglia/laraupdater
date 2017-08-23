@@ -1,0 +1,34 @@
+{
+    "name": "pcinaglia/laraupdater",
+    "description": "LaraUpdater allows your Laravel Application to auto-update itself.",
+    "keywords": [
+        "self-updater",
+        "update-checker",
+        "update-installer",
+        "laravel",
+        "backup-restore"
+    ],
+    "homepage": "https://github.com/pietrocinaglia/laraupdater",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pietro Cinaglia",
+            "homepage": "http://linkedin.com/in/pietrocinaglia",
+            "role": "Developer; Software Engineer."
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "pcinaglia\\laraupdater\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "pcinaglia\\laraupdater\\": "src"
+        }
+    }
+}
