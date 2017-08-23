@@ -48,7 +48,7 @@ Recommended Laravel Version >= 5.x
 
 This package can be installed through Composer:
 ```
-composer require "pcinaglia/laraupdater @dev"
+composer require pcinaglia/laraupdater
 ```
 
 After installation you must perform these steps:
