@@ -199,7 +199,7 @@ class LaraUpdaterController extends Controller
 	public function check()
 	{
 		$lastVersionInfo = $this->getLastVersion();
-		if ( $lastVersionInfo['version'] > $this->getCurrentVersion() )
+		if( version_compare($lastVersionInfo['version'], $this->getCurrentVersion(), ">") )
 			return $lastVersionInfo['version'];
 		
 		return '';
