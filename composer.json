@@ -30,7 +30,7 @@
         "psr-4": {
             "pcinaglia\\laraupdater\\": "src"
         }
-    }
+    },
     "extra":{
                 "laravel":{
                     "providers":[
