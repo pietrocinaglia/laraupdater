@@ -31,4 +31,11 @@
             "pcinaglia\\laraupdater\\": "src"
         }
     }
+    "extra":{
+                "laravel":{
+                    "providers":[
+                        "pcinaglia\\laraupdater\\LaraUpdaterServiceProvider"
+                    ]
+                }
+    }
 }
