@@ -1,5 +1,9 @@
 # LaraUpdater [ self-update for your Laravel App ]
 
+## Author
+* **Pietro Cinaglia** - Contact me using [GitHub](https://github.com/pietrocinaglia) or [LinkedIn](https://linkedin.com/in/pietrocinaglia)
+
+
 LaraUpdater allows your Laravel Application to auto-update itself ! ;)
 
 When you release an application is most important maintain it; therefore, could be necessary to publish an update for bugs fixing as well as for new features implementation.
@@ -18,10 +22,6 @@ WITHOUT LaraUpdate => Do you want to contact them one by one and send them the u
 - laravel 5.7 tested
 - zip file extract fixed
 
-
-
-## Author
-* **Pietro Cinaglia** - Contact me using [GitHub](https://github.com/pietrocinaglia) or [LinkedIn](https://linkedin.com/in/pietrocinaglia)
 
 ![alt text](readme_files/cover.png "LaraUpdater")
 
