@@ -40,6 +40,4 @@ return [
     'Updated' => 'Updated',
     'Updating' => 'Updating',
     'error_try_again' => 'Error.Try Again'
-
-
 ];

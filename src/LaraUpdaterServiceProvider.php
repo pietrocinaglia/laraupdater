@@ -4,7 +4,7 @@
 * 	.website: http://linkedin.com/in/pietrocinaglia
 */
 
-namespace salihkiraz\laraupdater;
+namespace pcinaglia\laraupdater;
 
 use Illuminate\Support\ServiceProvider;
 

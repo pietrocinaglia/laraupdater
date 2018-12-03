@@ -10,12 +10,13 @@ WITHOUT LaraUpdate => Do you want to contact them one by one and send them the u
 
 #### WITH LaraUpdater => Let your application (ALONE) detects that a new update is available and notifies its presence to the administrator; furthermore, let your application install it and handles all related steps.
 
-### NEW VERSION change log:
+### NEW VERSION change-log:
 - multi lang. supported
 - sample views add
 - laravel package auto discover added
 - laravel 5.7 tested
 - zip file extract fixed
+...thanks to salihkiraz :-)
 
 
 ## Author
