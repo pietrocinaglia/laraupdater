@@ -1,8 +1,8 @@
-# LaraUpdater [ self-update for your Laravel App ]
-
 ## Author
 * **Pietro Cinaglia** - Contact me using [GitHub](https://github.com/pietrocinaglia) or [LinkedIn](https://linkedin.com/in/pietrocinaglia)
 
+
+# LaraUpdater [ self-update for your Laravel App ]
 
 LaraUpdater allows your Laravel Application to auto-update itself ! ;)
 
