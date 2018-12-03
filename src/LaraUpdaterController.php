@@ -3,7 +3,7 @@
 * @author: Pietro Cinaglia
 * 	.website: http://linkedin.com/in/pietrocinaglia
 */
-namespace pietrocinaglia\laraUpdater;
+namespace pcinaglia\laraUpdater;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Config;
