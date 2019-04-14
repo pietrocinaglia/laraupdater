@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Artisan;
 use Auth;
+use pcinaglia\laraupdater\Policies\ILaraUpdaterPolicy;
+use ReflectionClass;
 
 class LaraUpdaterController extends Controller
 {
@@ -18,17 +20,22 @@ class LaraUpdaterController extends Controller
 
     private function checkPermission(){
 
-        if( config('laraupdater.allow_users_id') !== null ){
+        $className = config('laraupdater.permissions.policy');
 
-            // 1
-            if( config('laraupdater.allow_users_id') === false ) return true;
-
-            // 2
-            if( in_array(Auth::User()->id, config('laraupdater.allow_users_id')) === true ) return true;
+        if (!class_exists($className)) {
+            // TODO: Error class not found
         }
 
-        return false;
+        $ref = new ReflectionClass($className);
+        $instance = $ref->newInstance();
+
+        if (!$instance instanceof ILaraUpdaterPolicy) {
+            // TODO: Error class must implements ILARAUPDATERPOLICY
+        }
+
+        return $instance->authorize(Auth::user());
     }
+
     /*
     * Download and Install Update.
     */
