@@ -5,7 +5,11 @@
 */
 namespace pcinaglia\laraUpdater;
 
-use App\Http\Controllers\Controller;
+use GuzzleHttp\Client;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Artisan;
@@ -13,8 +17,9 @@ use Auth;
 use pcinaglia\laraupdater\Policies\ILaraUpdaterPolicy;
 use ReflectionClass;
 
-class LaraUpdaterController extends Controller
+class LaraUpdaterController extends BaseController
 {
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     private $tmp_backup_dir = null;
 
@@ -64,7 +69,7 @@ class LaraUpdaterController extends Controller
             echo '<p>&raquo; '.trans("laraupdater.Update_downloading_..").' ';
 
             $update_path = null;
-            if( ($update_path = $this->download($lastVersionInfo['archive'])) === false)
+            if( ($update_path = $this->download($lastVersionInfo)) === false)
                 throw new \Exception(trans("laraupdater.Error_during_download."));
 
             echo trans("laraupdater.OK").' </p>';
@@ -85,8 +90,8 @@ class LaraUpdaterController extends Controller
         }catch (\Exception $e) {
             echo '<p>'.trans("laraupdater.ERROR_DURING_UPDATE_(!!check_the_update_archive!!)");
 
+            echo $e->getMessage();
             $this->restore();
-
             echo '</p>';
         }
     }
@@ -108,16 +113,25 @@ class LaraUpdaterController extends Controller
                 $filename = zip_entry_name($zip_item);
                 $dirname = dirname($filename);
 
-                // Exclude these cases (1/2)
-                if(	substr($filename,-1,1) == '/' || dirname($filename) === $archive || substr($dirname,0,2) === '__') continue;
+                echo '<li><strong>'.$filename.'</strong></li>';
 
-                //Exclude root folder (if exist)
-                if( substr($dirname,0, strlen($archive)) === $archive )
-                    $dirname = substr($dirname, (strlen($dirname)-strlen($archive)-1)*(-1));
+                $rootDirectory = substr($filename, 0, strlen(strtok($filename, '/')));
+
+                // Exclude these cases (1/2)
+                // Ignore /
+                // Ignore __
+                // Ignore $archive
+                if(	substr($filename,-1,1) == '/'
+                    || dirname($filename) === $archive
+                    || substr($dirname,0,2) === '__')
+                    continue;
+
+                // Exclude root folder
+                $dirname = substr($dirname, strlen($rootDirectory));
 
                 // Exclude these cases (2/2)
                 // todo:check linux and windows test
-                //if($dirname === '.' ) continue;
+                // if($dirname === '.' ) continue;
 
                 $filename = $dirname.'/'.basename($filename); //set new purify path for current file
 
@@ -172,23 +186,35 @@ class LaraUpdaterController extends Controller
     /*
     * Download Update from $update_baseurl to $tmp_path (local folder).
     */
-    private function download($update_name)
+    private function download($update)
     {
+        $update_name = $update['version'] . '.zip';
+        $update_archive = $update['archive'];
         try{
-            $filename_tmp = config('laraupdater.tmp_path').'/'.$update_name;
+            $download_directory = base_path(config('laraupdater.tmp_path'));
+            $filename_tmp = $download_directory .'/'.$update_name;
+            echo $filename_tmp . '<br />';
+
+            if (!file_exists($download_directory)) {
+                mkdir($download_directory, 0777, true);
+            }
 
             if ( !is_file( $filename_tmp ) ) {
-                $newUpdate = file_get_contents(config('laraupdater.update_baseurl').'/'.$update_name);
+                $client = new Client();
+                $response = $client->request('GET', $update_archive);
 
                 $dlHandler = fopen($filename_tmp, 'w');
 
-                if ( !fwrite($dlHandler, $newUpdate) ){
+                if ( !fwrite($dlHandler, $response->getBody()) ){
                     echo '<p>'.trans("laraupdater.Could_not_save_new_update").'</p>';
                     exit();
                 }
             }
 
-        }catch (\Exception $e) { return false; }
+        }catch (\Exception $e) {
+            echo $e->getMessage() . '<br />';
+            return false;
+        }
 
         return $filename_tmp;
     }
@@ -197,8 +223,7 @@ class LaraUpdaterController extends Controller
     * Return current version (as plain text).
     */
     public function getCurrentVersion(){
-        // todo: env file version
-        $version = File::get(base_path().'/version.txt');
+        $version = File::get(base_path() . '/' . config('laraupdater.current_filename'));
         return $version;
     }
 
@@ -208,6 +233,7 @@ class LaraUpdaterController extends Controller
     public function check()
     {
         $lastVersionInfo = $this->getLastVersion();
+        print_r($this->getCurrentVersion());
         if( version_compare($lastVersionInfo['version'], $this->getCurrentVersion(), ">") )
             return $lastVersionInfo['version'];
 
@@ -219,7 +245,7 @@ class LaraUpdaterController extends Controller
     }
 
     private function getLastVersion(){
-        $content = file_get_contents(config('laraupdater.update_baseurl').'/laraupdater.json');
+        $content = file_get_contents(config('laraupdater.update_baseurl').'/' . config('laraupdater.last_update_filename'));
         $content = json_decode($content, true);
         return $content; //['version' => $v, 'archive' => 'RELEASE-$v.zip', 'description' => 'plain text...'];
     }

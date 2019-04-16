@@ -10,19 +10,22 @@
     ],
     "homepage": "https://github.com/rohsyl/laraupdater",
     "require": {
-        "php": ">=7.1.3"
+        "php": ">=7.1.3",
+        "ext-zip": "*",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.3@dev"
     },
     "license": "MIT",
     "authors": [
         {
-            "name": "Pietro Cinaglia",
-            "homepage": "http://linkedin.com/in/pietrocinaglia",
-            "role": "Developer; Software Engineer."
-        },
-        {
             "name": "Roh Sylvain",
             "homepage": "http://rohs.ch",
             "role": "Developer; IT Engineer."
+        },
+        {
+            "name": "Pietro Cinaglia",
+            "homepage": "http://linkedin.com/in/pietrocinaglia",
+            "role": "Developer; Software Engineer."
         }
     ],
     "minimum-stability": "dev",
@@ -37,10 +40,10 @@
         }
     },
     "extra":{
-                "laravel":{
-                    "providers":[
-                        "pcinaglia\\laraupdater\\LaraUpdaterServiceProvider"
-                    ]
-                }
+        "laravel":{
+            "providers":[
+                "pcinaglia\\laraupdater\\LaraUpdaterServiceProvider"
+            ]
+        }
     }
 }
