@@ -245,7 +245,7 @@ class LaraUpdaterController extends BaseController
     }
 
     private function setCurrentVersion($last){
-        File::put(base_path().'/version.txt', $last); //UPDATE $current_version to last version
+        File::put(base_path() . '/' . config('laraupdater.current_filename'), $last); //UPDATE $current_version to last version
     }
 
     private function getLastVersion(){
