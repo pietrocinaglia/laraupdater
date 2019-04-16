@@ -98,6 +98,8 @@ class LaraUpdaterController extends BaseController
 
     private function install($lastVersion, $update_path, $archive)
     {
+
+        $changelogs = [];
         try{
             $execute_commands = false;
             $upgrade_cmds_filename = 'upgrade.php';
@@ -106,14 +108,10 @@ class LaraUpdaterController extends BaseController
             $zipHandle = zip_open($update_path);
             $archive = substr($archive,0, -4);
 
-            echo '<p>'.trans("laraupdater.CHANGELOG").': </p>';
-            echo '<ul>';
 
             while ($zip_item = zip_read($zipHandle) ){
                 $filename = zip_entry_name($zip_item);
                 $dirname = dirname($filename);
-
-                echo '<li><strong>'.$filename.'</strong></li>';
 
                 $rootDirectory = substr($filename, 0, strlen(strtok($filename, '/')));
 
@@ -137,7 +135,7 @@ class LaraUpdaterController extends BaseController
 
                 if ( !is_dir(base_path().'/'.$dirname) ){ //Make NEW directory (if exist also in current version continue...)
                     File::makeDirectory(base_path().'/'.$dirname, $mode = 0755, true, true);
-                    echo '<li>'.trans("laraupdater.Directory").' => '.$dirname.'[ '.trans("laraupdater.OK").' ]</li>';
+                    $changelogs[] = trans("laraupdater.Directory").' => '.$dirname.'[ '.trans("laraupdater.OK").' ]';
                 }
 
                 if ( !is_dir(base_path().'/'.$filename) ){ //Overwrite a file with its last version
@@ -149,20 +147,26 @@ class LaraUpdaterController extends BaseController
                         $execute_commands = true;
 
                     }else {
-                        echo '<li>'.trans("laraupdater.File").' => '.$filename.' ........... ';
+                        $changelog = trans("laraupdater.File").' => '.$filename.' ........... ';
 
-                        if(File::exists(base_path().'/'.$filename)) $this->backup($filename); //backup current version
+                        // backup current version if it exists
+                        if(File::exists(base_path().'/'.$filename)) {
+                            $this->backup($filename);
+                        }
 
                         File::put(base_path().'/'.$filename, $contents);
+
                         unset($contents);
-                        echo' [ '.trans("laraupdater.OK").' ]'.'</li>';
+
+                        $changelog .= ' [ '.trans("laraupdater.OK").' ]';
+                        $changelogs[] = $changelog;
                     }
 
                 }
             }
             zip_close($zipHandle);
-            echo '</ul>';
 
+            // TODO: improve post_upgrade scripts system
             if($execute_commands == true){
                 include ($upgrade_cmds_path);
 
