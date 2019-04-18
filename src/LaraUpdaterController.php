@@ -98,16 +98,10 @@ class LaraUpdaterController extends BaseController
 
     private function install($lastVersion, $update_path, $archive)
     {
-
+        $messages = [];
         $changelogs = [];
         try{
-            $execute_commands = false;
-            $upgrade_cmds_filename = 'upgrade.php';
-            $upgrade_cmds_path = config('laraupdater.tmp_path').'/'.$upgrade_cmds_filename;
-
             $zipHandle = zip_open($update_path);
-            $archive = substr($archive,0, -4);
-
 
             while ($zip_item = zip_read($zipHandle) ){
                 $filename = zip_entry_name($zip_item);
@@ -120,7 +114,6 @@ class LaraUpdaterController extends BaseController
                 // Ignore __
                 // Ignore $archive
                 if(	substr($filename,-1,1) == '/'
-                    || dirname($filename) === $archive
                     || substr($dirname,0,2) === '__')
                     continue;
 
@@ -142,49 +135,69 @@ class LaraUpdaterController extends BaseController
                     $contents = zip_entry_read($zip_item, zip_entry_filesize($zip_item));
                     $contents = str_replace("\r\n", "\n", $contents);
 
-                    if ( strpos($filename, 'upgrade.php') !== false ) {
-                        File::put($upgrade_cmds_path, $contents);
-                        $execute_commands = true;
 
-                    }else {
-                        $changelog = trans("laraupdater.File").' => '.$filename.' ........... ';
+                    $changelog = trans("laraupdater.File").' => '.$filename.' ........... ';
 
-                        // backup current version if it exists
-                        if(File::exists(base_path().'/'.$filename)) {
-                            $this->backup($filename);
-                        }
-
-                        File::put(base_path().'/'.$filename, $contents);
-
-                        unset($contents);
-
-                        $changelog .= ' [ '.trans("laraupdater.OK").' ]';
-                        $changelogs[] = $changelog;
+                    // backup current version if it exists
+                    if(File::exists(base_path().'/'.$filename)) {
+                        $this->backup($filename);
                     }
+
+                    File::put(base_path().'/'.$filename, $contents);
+
+                    unset($contents);
+
+                    $changelog .= ' [ '.trans("laraupdater.OK").' ]';
+                    $changelogs[] = $changelog;
 
                 }
             }
             zip_close($zipHandle);
 
-            // TODO: improve post_upgrade scripts system
-            if($execute_commands == true){
-                include ($upgrade_cmds_path);
+            $messages[] = [
+                'message' => 'Changelog',
+                'details' => $changelogs
+            ];
 
-                if(main()) //upgrade-VERSION.php contains the 'main()' method with a BOOL return to check its execution.
-                    echo '<p class="success">&raquo; '. trans("laraupdater.Commands_successfully_executed.") .'</p>';
-                else
-                    echo '<p class="danger">&raquo;'. trans("laraupdater.Error_during_commands_execution.") .'</p>';
 
-                unlink($upgrade_cmds_path);
-                File::delete($upgrade_cmds_path); //clean TMP
+            $upgradeScritPath = base_path() . '/' . config('laraupdater:post_upgrade_file_location');
+            if (file_exists($upgradeScritPath)){
+                include ($upgradeScritPath);
+
+                if (function_exists('laraupdater_post_upgrade')) {
+
+                    if (call_user_func('laraupdater_post_upgrade', $lastVersion)) {
+                        $messages[] = [
+                            'message' => trans("laraupdater.Commands_successfully_executed.")
+                        ];
+                    }
+                    else {
+                        $messages[] = [
+                            'message' => trans("laraupdater.Error_during_commands_execution.")
+                        ];
+                    }
+                }
             }
 
             File::delete($update_path); //clean TMP
             File::deleteDirectory($this->tmp_backup_dir); //remove backup temp folder
 
-        }catch (\Exception $e) { return false; }
 
-        return true;
+        }catch (\Exception $e) {
+            $messages[] = [
+                'message' => 'Error during the install',
+                'details' => [$e->getMessage()]
+            ];
+            return [
+                'succes' => false,
+                'messages' => $messages
+            ];
+        }
+
+        return [
+            'succes' => true,
+            'messages' => $messages
+        ];
     }
 
     /*

@@ -16,6 +16,14 @@
 		*/
 		'update_baseurl' => 'http://site.com/yourapp/updates',
 
+        /* ********************
+         * POST INSTALL SCRIPT
+         * ********************
+         * If this file exists in your app after the extraction of the archive and if
+         * it contains a laraupdater_post_upgrade($lastVersion) method it will be executed.
+         */
+        'post_upgrade_file_location' => 'update/update.php',
+
         /*
          * The name of the file in which the last version information are stored on your webserver
          */
