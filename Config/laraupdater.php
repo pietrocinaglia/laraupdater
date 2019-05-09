@@ -20,7 +20,7 @@
          * POST INSTALL SCRIPT
          * ********************
          * If this file exists in your app after the extraction of the archive and if
-         * it contains a laraupdater_post_upgrade($lastVersion) method it will be executed.
+         * it contains a laraupdater_post_upgrade($currentVersion, $lastVersion) method it will be executed.
          */
         'post_upgrade_file_location' => 'update/update.php',
 
@@ -40,6 +40,16 @@
 		* Only 'auth' NOT works (manage security using 'permissions' configuration)
 		*/
 		'middleware' => ['web', 'auth'],
+
+        /*
+         * Set of directory that will be ignored and not overwrited.
+         */
+        'blacklist_directory' => [
+            /*
+             * The config directory could be different in every instance of the app. That's why we ignore it
+             */
+            'config'
+        ],
 
         'permissions' => [
             /**

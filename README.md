@@ -2,28 +2,37 @@
 * **Pietro Cinaglia** - Contact me using [GitHub](https://github.com/pietrocinaglia) or [LinkedIn](https://linkedin.com/in/pietrocinaglia)
 
 
-# LaraUpdater [ self-update for your Laravel App ]
+# LaraUpdater
 
-LaraUpdater allows your Laravel Application to auto-update itself ! ;)
+> *self-update for your Laravel App*
 
-When you release an application is most important maintain it; therefore, could be necessary to publish an update for bugs fixing as well as for new features implementation.
+LaraUpdater allows your Laravel Application to auto-update itself !
+
+When you release an application is most important maintain it, therefore, could be necessary to publish an update for bugs fixing as well as for new features implementation.
 
 You deploy your App for several users:
 
-WITHOUT LaraUpdate => Do you want to contact them one by one and send them the update using an email or a link ? ...mmm...very bad becouse each user (with admin role) have to overwrite manually all files on his deployment; or, you have to access manually all deployments (e.g. using FTP) and install for them the update.
+ - WITHOUT LaraUpdate
+   
+   Do you want to contact them one by one and send them the update using an email or a link ? ...mmm...very bad becouse each user (with admin role) have to overwrite manually all files on his deployment; or, you have to access manually all deployments (e.g. using FTP) and install for them the update.
 
-#### WITH LaraUpdater => Let your application (ALONE) detects that a new update is available and notifies its presence to the administrator; furthermore, let your application install it and handles all related steps.
+ - **WITH LaraUpdater**
+ 
+    Let your application (ALONE) detects that a new update is available and notifies its presence to the administrator; furthermore, let your application install it and handles all related steps.
 
 ### NEW VERSION change-log 
+
+[ thanks to rohsyl ]
+- improve permissions managment with the implementation of `ILaraUpdaterPolicy`
+- improve message display (`ob_flush`)
+- improve post upgrade script
+
 [ thanks to salihkiraz :) ]
 - multi lang. supported
 - sample views add
 - laravel package auto discover added
 - laravel 5.7 tested
 - zip file extract fixed
-
-
-![alt text](readme_files/cover.png "LaraUpdater")
 
 ## Features:
 
@@ -50,7 +59,7 @@ These instructions will get you a copy of the project up and running on your ser
 
 ### Prerequisites
 
-LaraUpdater has been tested using Laravel 5.4
+LaraUpdater has been tested using Laravel 5.7
 Recommended Laravel Version >= 5.x
 
 
@@ -58,7 +67,7 @@ Recommended Laravel Version >= 5.x
 
 This package can be installed through Composer:
 ```
-composer require pcinaglia/laraupdater
+composer require rohsyl/laraupdater
 ```
 
 After installation you must perform these steps:
@@ -92,28 +101,63 @@ When it is published you can manage the configuration of LaraUpdater through the
     */
     'update_baseurl' => 'http://site.com/yourapp/updates',
 
+    /* ********************
+     * POST INSTALL SCRIPT
+     * ********************
+     * If this file exists in your app after the extraction of the archive and if
+     * it contains a laraupdater_post_upgrade($currentVersion, $lastVersion) method it will be executed.
+     */
+    'post_upgrade_file_location' => 'update/update.php',
+
     /*
-    * Set a middleware for the route: updater.update
-    * Only 'auth' NOT works (manage security using 'allow_users_id' configuration)
+     * The name of the file in which the last version information are stored on your webserver
+     */
+    'last_update_filename' => 'current.json',
+
+    /**
+     * The name of the file that contains the current version
+     * This file is located at the root of the project
+     */
+    'current_filename' => 'version',
+
+    /*
+    * Set a middleware for every routes
+    * Only 'auth' NOT works (manage security using 'permissions' configuration)
     */
     'middleware' => ['web', 'auth'],
 
-    /*
-    * Set which users can perform an update; 
-    * This parameter accepts: ARRAY(user_id) ,or FALSE => for example: [1]  OR  [1,3,0]  OR  false
-    * Generally, ADMIN have user_id=1; set FALSE to disable this check (not recommended)
-    */
-    'allow_users_id' => [1] 
+    'permissions' => [
+        /**
+         * Set which policy to check permissions
+         * You can create your own by implementing the
+         * pcinaglia\laraupdater\Policies\ILaraUpdaterPolicy interface
+         * and registering it here
+         */
+        'policy' => pcinaglia\laraupdater\Policies\AllowUserIdLaraUpdaterPolicy::class,
+        'parameters' => [
+            /*
+             * This entry is related to the policy :
+             * pcinaglia\laraupdater\Policies\AllowUserIdLaraUpdaterPolicy
+             *
+             * If you are not using this policy, you can remove it.
+             *
+             * Set which users can perform an update;
+             * This parameter accepts: ARRAY(user_id) ,or FALSE => for example: [1]  OR  [1,3,0]  OR  false
+             * Generally, ADMIN have user_id=1; set FALSE to disable this check (not recommended)
+             */
+            'allow_users_id' => [1],
+        ]
+    ],
 ```
 
-#### 3) Create version.txt
-To store current version of your application you have to create a text file named `version.txt` and copy it in the main folder of your Laravel App.
-For example, create a .txt file that contains only:
+#### 3) Create version
+To store current version of your application you have to create a text file named `version` and copy it in the main folder of your Laravel App.
+For example, create a file that contains only:
 ```
-1.0
+1.0.0
 ```
-...use only 1 row, the first, of the .txt file.
-When release an update this files is updated from LaraUpdate.
+...use only 1 row, the first, of the file.
+When release an update this files is updated by LaraUpdate.
 
 
 ## Create your update "repository"
@@ -122,12 +166,12 @@ When release an update this files is updated from LaraUpdate.
 Create a .zip archive with all files that you want replace during the update (use the same structure of your application to organize the files in the archive).
 
 #### 1.1) Upgrade Script (optional)
-You can create a PHP file named `upgrade.php` to perform custom actions (e.g. create a new table in the database).
-This file must contain a function named `main()` with a boolean return (to pass the status of its execution to LaraUpdater), see this example:
+You can create a PHP file named `update/update.php` to perform custom actions (e.g. create a new table in the database).
+This file must contain a function named `laraupdater_post_upgrade($currentVersion, $newlyInstalledVersion) ` with a boolean return (to pass the status of its execution to LaraUpdater), see this example:
 ```
 <?php
 
-function main(){
+function laraupdater_post_upgrade($currentVersion, $newlyInstalledVersion) {
 
 	command-1-to-connect-db
 	command-2-to-create-table
@@ -142,7 +186,7 @@ Note that the above example does not handle any exceptions, so the status of its
 
 #### 2) Set the Metadata for your Update:
 
-Create a file named `laraupdater.json` like this:
+Create a file named `current.json` like this:
 ```
 {
 	"version": "1.0.2",
@@ -155,7 +199,7 @@ Create a file named `laraupdater.json` like this:
 
 #### 3) Upload your update
 
-Upload `laraupdater.json` and .zip Archive in the same folder of your server (the one that will host the update).
+Upload `current.json` and .zip Archive in the same folder of your server (the one that will host the update).
 
 	
 #### 4) Configure your application

@@ -39,5 +39,6 @@ return [
     'Update_Available' => 'Une mise à jour est disponible',
     'Updated' => 'Mis à jour',
     'Updating' => 'Mise à jour en cours',
-    'error_try_again' => 'Erreur. Veuillez essayer encore.'
+    'error_try_again' => 'Erreur. Veuillez essayer encore.',
+    'Restored' => 'Restauré'
 ];

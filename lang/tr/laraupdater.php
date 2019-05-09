@@ -38,5 +38,6 @@ return [
     'Update_Available' => 'Güncelleme Mevcut',
     'Updated' => 'Güncellendi',
     'Updating' => 'Güncelleniyor',
-    'error_try_again' => 'Hata oluştu.Tekrar deneyiniz'
+    'error_try_again' => 'Hata oluştu.Tekrar deneyiniz',
+    'Restored' => 'Restored'
 ];
