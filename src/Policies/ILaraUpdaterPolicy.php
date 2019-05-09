@@ -6,7 +6,7 @@
  * Time: 11:54
  */
 
-namespace pcinaglia\laraupdater\Policies;
+namespace rohsyl\laraupdater\Policies;
 
 
 interface ILaraUpdaterPolicy

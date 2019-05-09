@@ -77,7 +77,7 @@ After installation you must perform these steps:
 ```
 'providers' => [
     // ...
-    pcinaglia\laraupdater\LaraUpdaterServiceProvider::class,
+    rohsyl\laraupdater\LaraUpdaterServiceProvider::class,
 ];
 ```
 
@@ -85,7 +85,7 @@ After installation you must perform these steps:
 This step will copy the config file in the config folder of your Laraver App.
 
 ```
-php artisan vendor:publish --provider="pcinaglia\laraupdater\LaraUpdaterServiceProvider"
+php artisan vendor:publish --provider="rohsyl\laraupdater\LaraUpdaterServiceProvider"
 ```
 
 When it is published you can manage the configuration of LaraUpdater through the file in `config/laraupdater.php`, it contains:

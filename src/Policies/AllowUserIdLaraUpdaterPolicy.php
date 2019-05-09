@@ -6,7 +6,7 @@
  * Time: 11:55
  */
 
-namespace pcinaglia\laraupdater\Policies;
+namespace rohsyl\laraupdater\Policies;
 
 
 class AllowUserIdLaraUpdaterPolicy implements ILaraUpdaterPolicy

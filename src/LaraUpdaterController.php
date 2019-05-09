@@ -3,7 +3,7 @@
 * @author: Pietro Cinaglia
 * 	.website: http://linkedin.com/in/pietrocinaglia
 */
-namespace pcinaglia\laraUpdater;
+namespace rohsyl\laraUpdater;
 
 use GuzzleHttp\Client;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Artisan;
 use Auth;
-use pcinaglia\laraupdater\Policies\ILaraUpdaterPolicy;
+use rohsyl\laraupdater\Policies\ILaraUpdaterPolicy;
 use ReflectionClass;
 
 class LaraUpdaterController extends BaseController
