@@ -31,18 +31,18 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "pcinaglia\\laraupdater\\": "src"
+            "rohsyl\\laraupdater\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "pcinaglia\\laraupdater\\": "src"
+            "rohsyl\\laraupdater\\": "src"
         }
     },
     "extra":{
         "laravel":{
             "providers":[
-                "pcinaglia\\laraupdater\\LaraUpdaterServiceProvider"
+                "rohsyl\\laraupdater\\LaraUpdaterServiceProvider"
             ]
         }
     }
