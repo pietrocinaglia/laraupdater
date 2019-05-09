@@ -55,14 +55,14 @@
             /**
              * Set which policy to check permissions
              * You can create your own by implementing the
-             * pcinaglia\laraupdater\Policies\ILaraUpdaterPolicy interface
+             * rohsyl\laraupdater\Policies\ILaraUpdaterPolicy interface
              * and registering it here
              */
-            'policy' => pcinaglia\laraupdater\Policies\AllowUserIdLaraUpdaterPolicy::class,
+            'policy' => rohsyl\laraupdater\Policies\AllowUserIdLaraUpdaterPolicy::class,
             'parameters' => [
                 /*
                  * This entry is related to the policy :
-                 * pcinaglia\laraupdater\Policies\AllowUserIdLaraUpdaterPolicy
+                 * rohsyl\laraupdater\Policies\AllowUserIdLaraUpdaterPolicy
                  *
                  * If you are not using this policy, you can remove it.
                  *
