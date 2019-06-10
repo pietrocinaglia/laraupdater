@@ -39,5 +39,6 @@ return [
     'Update_Available' => 'Update Available',
     'Updated' => 'Updated',
     'Updating' => 'Updating',
-    'error_try_again' => 'Error.Try Again'
+    'error_try_again' => 'Error.Try Again',
+    'Restored' => 'Restored'
 ];

@@ -1,5 +1,5 @@
 {
-    "name": "pcinaglia/laraupdater",
+    "name": "rohsyl/laraupdater",
     "description": "LaraUpdater allows your Laravel Application to auto-update itself.",
     "keywords": [
         "self-updater",
@@ -8,12 +8,20 @@
         "laravel",
         "backup-restore"
     ],
-    "homepage": "https://github.com/pietrocinaglia/laraupdater",
+    "homepage": "https://github.com/rohsyl/laraupdater",
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=7.1.3",
+        "ext-zip": "*",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.3@dev"
     },
     "license": "MIT",
     "authors": [
+        {
+            "name": "Roh Sylvain",
+            "homepage": "http://rohs.ch",
+            "role": "Developer; IT Engineer."
+        },
         {
             "name": "Pietro Cinaglia",
             "homepage": "http://linkedin.com/in/pietrocinaglia",
@@ -23,19 +31,19 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "pcinaglia\\laraupdater\\": "src"
+            "rohsyl\\laraupdater\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "pcinaglia\\laraupdater\\": "src"
+            "rohsyl\\laraupdater\\": "src"
         }
     },
     "extra":{
-                "laravel":{
-                    "providers":[
-                        "pcinaglia\\laraupdater\\LaraUpdaterServiceProvider"
-                    ]
-                }
+        "laravel":{
+            "providers":[
+                "rohsyl\\laraupdater\\LaraUpdaterServiceProvider"
+            ]
+        }
     }
 }

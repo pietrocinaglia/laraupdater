@@ -3,161 +3,196 @@
 * @author: Pietro Cinaglia
 * 	.website: http://linkedin.com/in/pietrocinaglia
 */
-namespace pcinaglia\laraUpdater;
+namespace rohsyl\laraUpdater;
 
-use App\Http\Controllers\Controller;
+use GuzzleHttp\Client;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Artisan;
 use Auth;
+use rohsyl\laraupdater\Policies\ILaraUpdaterPolicy;
+use ReflectionClass;
 
-class LaraUpdaterController extends Controller
+class LaraUpdaterController extends BaseController
 {
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     private $tmp_backup_dir = null;
 
     private function checkPermission(){
 
-        if( config('laraupdater.allow_users_id') !== null ){
+        $className = config('laraupdater.permissions.policy');
 
-            // 1
-            if( config('laraupdater.allow_users_id') === false ) return true;
-
-            // 2
-            if( in_array(Auth::User()->id, config('laraupdater.allow_users_id')) === true ) return true;
+        if (!class_exists($className)) {
+            // TODO: Error class not found
         }
 
-        return false;
+        $ref = new ReflectionClass($className);
+        $instance = $ref->newInstance();
+
+        if (!$instance instanceof ILaraUpdaterPolicy) {
+            // TODO: Error class must implements ILARAUPDATERPOLICY
+        }
+
+        return $instance->authorize(Auth::user());
     }
+
     /*
     * Download and Install Update.
     */
     public function update()
     {
-        echo "<h2>".trans("laraupdater.LaraUpdater")."</h2>";
-        echo '<h4><a href="'.url('/').'">'.trans("laraupdater.Return_to_App_HOME").'</a></h4>';
+        ignore_user_abort(true);
+        header( 'Content-type: text/html; charset=utf-8' );
 
         if( ! $this->checkPermission() ){
-            echo trans("laraupdater.ACTION_NOT_ALLOWED.");
-            exit;
+            $this->println(trans("laraupdater.ACTION_NOT_ALLOWED."));
+            return;
         }
 
         $lastVersionInfo = $this->getLastVersion();
 
         if ( $lastVersionInfo['version'] <= $this->getCurrentVersion() ){
-            echo '<p>&raquo; '.trans("laraupdater.Your_System_IS_ALREADY_UPDATED_to_last version").' !</p>';
-            exit;
+            $this->println(trans("laraupdater.Your_System_IS_ALREADY_UPDATED_to_last version"));
+            return;
         }
 
         try{
             $this->tmp_backup_dir = base_path().'/backup_'.date('Ymd');
 
-            echo '<p>'.trans("laraupdater.UPDATE_FOUND").': '.$lastVersionInfo['version'].' <i>('.trans("laraupdater.current_version").': '.$this->getCurrentVersion().')</i></p>';
-            echo '<p>'.trans("laraupdater.DESCRIPTION").': <i>'.$lastVersionInfo['description'].'</i></p>';
-            echo '<p>&raquo; '.trans("laraupdater.Update_downloading_..").' ';
+            $this->println(trans("laraupdater.UPDATE_FOUND"));
+            $this->println($lastVersionInfo['version'].' <i>('.trans("laraupdater.current_version").': '.$this->getCurrentVersion().')</i>');
+            $this->println(trans("laraupdater.DESCRIPTION").': <i>'.$lastVersionInfo['description'].'</i>');
+
+            $this->println(trans("laraupdater.Update_downloading_.."));
 
             $update_path = null;
-            if( ($update_path = $this->download($lastVersionInfo['archive'])) === false)
+            if( ($update_path = $this->download($lastVersionInfo)) === false)
                 throw new \Exception(trans("laraupdater.Error_during_download."));
 
-            echo trans("laraupdater.OK").' </p>';
+            $this->println(trans("laraupdater.OK"));
 
             Artisan::call('down');
-            echo '<p>&raquo; '.trans("laraupdater.SYSTEM_Mantence_Mode").' => '.trans("laraupdater.ON").'</p>';
 
-            $status = $this->install($lastVersionInfo['version'], $update_path, $lastVersionInfo['archive']);
+            $this->println(trans("laraupdater.SYSTEM_Mantence_Mode").' => '.trans("laraupdater.ON"));
 
-            if($status){
+            if($this->install($lastVersionInfo['version'], $update_path, $lastVersionInfo['archive'])){
                 $this->setCurrentVersion($lastVersionInfo['version']); //update system version
+
                 Artisan::call('up'); //restore system UP status
-                echo '<p>&raquo; '.trans("laraupdater.SYSTEM_Mantence_Mode").' => '.trans("laraupdater.OFF").'</p>';
-                echo '<p class="success">'.trans("laraupdater.SYSTEM_IS_NOW_UPDATED_TO_VERSION").': '.$lastVersionInfo['version'].'</p>';
+
+                $this->println(trans("laraupdater.SYSTEM_Mantence_Mode").' => '.trans("laraupdater.OFF"));
+                $this->println(trans("laraupdater.SYSTEM_IS_NOW_UPDATED_TO_VERSION").': '.$lastVersionInfo['version']);
             }else
                 throw new \Exception(trans("laraupdater.Error_during_download."));
 
         }catch (\Exception $e) {
-            echo '<p>'.trans("laraupdater.ERROR_DURING_UPDATE_(!!check_the_update_archive!!)");
+
+            $this->println(trans("laraupdater.ERROR_DURING_UPDATE_(!!check_the_update_archive!!)"));
+            $this->println($e->getMessage());
 
             $this->restore();
 
-            echo '</p>';
+            return;
         }
     }
 
     private function install($lastVersion, $update_path, $archive)
     {
+        $currentVersion = $this->getCurrentVersion();
         try{
-            $execute_commands = false;
-            $upgrade_cmds_filename = 'upgrade.php';
-            $upgrade_cmds_path = config('laraupdater.tmp_path').'/'.$upgrade_cmds_filename;
-
             $zipHandle = zip_open($update_path);
-            $archive = substr($archive,0, -4);
-
-            echo '<p>'.trans("laraupdater.CHANGELOG").': </p>';
-            echo '<ul>';
 
             while ($zip_item = zip_read($zipHandle) ){
                 $filename = zip_entry_name($zip_item);
                 $dirname = dirname($filename);
 
-                // Exclude these cases (1/2)
-                if(	substr($filename,-1,1) == '/' || dirname($filename) === $archive || substr($dirname,0,2) === '__') continue;
+                $rootDirectory = substr($filename, 0, strlen(strtok($filename, '/')));
 
-                //Exclude root folder (if exist)
-                if( substr($dirname,0, strlen($archive)) === $archive )
-                    $dirname = substr($dirname, (strlen($dirname)-strlen($archive)-1)*(-1));
+                // Exclude these cases (1/2)
+                // Ignore /
+                // Ignore __
+                // Ignore $archive
+                if(	substr($filename,-1,1) == '/'
+                    || substr($dirname,0,2) === '__')
+                    continue;
+
+                // Ignore blacklist_directory
+                if(in_array($dirname, config('laraupdater.blacklist_directory'))) {
+                    continue;
+                }
+
+                // Exclude root folder
+                $dirname = substr($dirname, strlen($rootDirectory));
 
                 // Exclude these cases (2/2)
                 // todo:check linux and windows test
-                //if($dirname === '.' ) continue;
+                // if($dirname === '.' ) continue;
 
                 $filename = $dirname.'/'.basename($filename); //set new purify path for current file
 
                 if ( !is_dir(base_path().'/'.$dirname) ){ //Make NEW directory (if exist also in current version continue...)
                     File::makeDirectory(base_path().'/'.$dirname, $mode = 0755, true, true);
-                    echo '<li>'.trans("laraupdater.Directory").' => '.$dirname.'[ '.trans("laraupdater.OK").' ]</li>';
+                    $this->println(trans("laraupdater.Directory").' => '.$dirname.'[ '.trans("laraupdater.OK").' ]');
                 }
 
                 if ( !is_dir(base_path().'/'.$filename) ){ //Overwrite a file with its last version
                     $contents = zip_entry_read($zip_item, zip_entry_filesize($zip_item));
                     $contents = str_replace("\r\n", "\n", $contents);
 
-                    if ( strpos($filename, 'upgrade.php') !== false ) {
-                        File::put($upgrade_cmds_path, $contents);
-                        $execute_commands = true;
 
-                    }else {
-                        echo '<li>'.trans("laraupdater.File").' => '.$filename.' ........... ';
+                    $this->print(trans("laraupdater.File").' => '.$filename.' ........... ');
 
-                        if(File::exists(base_path().'/'.$filename)) $this->backup($filename); //backup current version
-
-                        File::put(base_path().'/'.$filename, $contents);
-                        unset($contents);
-                        echo' [ '.trans("laraupdater.OK").' ]'.'</li>';
+                    // backup current version if it exists
+                    if(File::exists(base_path().'/'.$filename)) {
+                        $this->backup($filename);
                     }
 
+                    File::put(base_path().'/'.$filename, $contents);
+
+                    unset($contents);
+
+                    $this->println(' [ '.trans("laraupdater.OK").' ]');
                 }
             }
             zip_close($zipHandle);
-            echo '</ul>';
 
-            if($execute_commands == true){
-                include ($upgrade_cmds_path);
 
-                if(main()) //upgrade-VERSION.php contains the 'main()' method with a BOOL return to check its execution.
-                    echo '<p class="success">&raquo; '. trans("laraupdater.Commands_successfully_executed.") .'</p>';
-                else
-                    echo '<p class="danger">&raquo;'. trans("laraupdater.Error_during_commands_execution.") .'</p>';
+            $upgradeScritPath = base_path() . '/' . config('laraupdater.post_upgrade_file_location');
+            $this->println('Upgrade script path is : ' .$upgradeScritPath);
+            if (file_exists($upgradeScritPath) && !is_dir($upgradeScritPath)){
 
-                unlink($upgrade_cmds_path);
-                File::delete($upgrade_cmds_path); //clean TMP
+                include($upgradeScritPath);
+
+                if (function_exists('laraupdater_post_upgrade')) {
+                    if (call_user_func('laraupdater_post_upgrade', $currentVersion, $lastVersion)) {
+                        $this->println(trans("laraupdater.Commands_successfully_executed."));
+                    }
+                    else {
+                        $this->println(trans("laraupdater.Error_during_commands_execution."));
+                    }
+                }
+                else {
+                    $this->println('Upgrade script ignored. (laraupdater_post_upgrade not exists in the file)');
+                }
+            }
+            else {
+                $this->println(trans('Upgrade script ignored. (not exists or not a file)'));
             }
 
             File::delete($update_path); //clean TMP
             File::deleteDirectory($this->tmp_backup_dir); //remove backup temp folder
 
-        }catch (\Exception $e) { return false; }
+
+        }catch (\Exception $e) {
+            $this->println('Error during the install');
+            $this->println($e->getMessage());
+            return false;
+        }
 
         return true;
     }
@@ -165,23 +200,35 @@ class LaraUpdaterController extends Controller
     /*
     * Download Update from $update_baseurl to $tmp_path (local folder).
     */
-    private function download($update_name)
+    private function download($update)
     {
+        $update_name = $update['version'] . '.zip';
+        $update_archive = $update['archive'];
         try{
-            $filename_tmp = config('laraupdater.tmp_path').'/'.$update_name;
+            $download_directory = base_path(config('laraupdater.tmp_path'));
+            $filename_tmp = $download_directory .'/'.$update_name;
+            $this->println($filename_tmp);
+
+            if (!file_exists($download_directory)) {
+                mkdir($download_directory, 0777, true);
+            }
 
             if ( !is_file( $filename_tmp ) ) {
-                $newUpdate = file_get_contents(config('laraupdater.update_baseurl').'/'.$update_name);
+                $client = new Client();
+                $response = $client->request('GET', $update_archive);
 
                 $dlHandler = fopen($filename_tmp, 'w');
 
-                if ( !fwrite($dlHandler, $newUpdate) ){
-                    echo '<p>'.trans("laraupdater.Could_not_save_new_update").'</p>';
+                if ( !fwrite($dlHandler, $response->getBody()) ){
+                    $this->println(trans("laraupdater.Could_not_save_new_update"));
                     exit();
                 }
             }
 
-        }catch (\Exception $e) { return false; }
+        }catch (\Exception $e) {
+            $this->println($e->getMessage());
+            return false;
+        }
 
         return $filename_tmp;
     }
@@ -190,8 +237,7 @@ class LaraUpdaterController extends Controller
     * Return current version (as plain text).
     */
     public function getCurrentVersion(){
-        // todo: env file version
-        $version = File::get(base_path().'/version.txt');
+        $version = File::get(base_path() . '/' . config('laraupdater.current_filename'));
         return $version;
     }
 
@@ -208,11 +254,11 @@ class LaraUpdaterController extends Controller
     }
 
     private function setCurrentVersion($last){
-        File::put(base_path().'/version.txt', $last); //UPDATE $current_version to last version
+        File::put(base_path() . '/' . config('laraupdater.current_filename'), $last); //UPDATE $current_version to last version
     }
 
     private function getLastVersion(){
-        $content = file_get_contents(config('laraupdater.update_baseurl').'/laraupdater.json');
+        $content = file_get_contents(config('laraupdater.update_baseurl').'/' . config('laraupdater.last_update_filename'));
         $content = json_decode($content, true);
         return $content; //['version' => $v, 'archive' => 'RELEASE-$v.zip', 'description' => 'plain text...'];
     }
@@ -227,29 +273,45 @@ class LaraUpdaterController extends Controller
     }
 
     private function restore(){
+
         if( !isset($this->tmp_backup_dir) )
             $this->tmp_backup_dir = base_path().'/backup_'.date('Ymd');
 
-        try{
+        try {
             $backup_dir = $this->tmp_backup_dir;
             $backup_files = File::allFiles($backup_dir);
 
-            foreach ($backup_files as $file){
+            foreach ($backup_files as $file) {
                 $filename = (string)$file;
                 $filename = substr($filename, (strlen($filename)-strlen($backup_dir)-1)*(-1));
-                echo $backup_dir.'/'.$filename." => ".base_path().'/'.$filename;
+
+                $this->println($backup_dir.'/'.$filename." => ".base_path().'/'.$filename);
                 File::copy($backup_dir.'/'.$filename, base_path().'/'.$filename); //to respective folder
             }
 
-        }catch(\Exception $e) {
-            echo "Exception => ".$e->getMessage();
-            echo "<BR>[ ".trans("laraupdater.FAILED")." ]";
-            echo "<BR> ".trans("laraupdater.Backup_folder_is_located_in:")." <i>".$backup_dir."</i>.";
-            echo "<BR> ".trans("laraupdater.Remember_to_restore_System_UP-Status_through_shell_command:")." <i>php artisan up</i>.";
+            $this->println(trans("laraupdater.RESTORED"));
+
+        } catch(\Exception $e) {
+
+            $this->println(trans("laraupdater.FAILED"));
+
+            $this->println($e->getMessage());
+            $this->println(trans("laraupdater.Backup_folder_is_located_in:")." <i>".$backup_dir."</i>.");
+            $this->println(trans("laraupdater.Remember_to_restore_System_UP-Status_through_shell_command:")." <i>php artisan up</i>.");
+
             return false;
         }
 
-        echo "[ ".trans("laraupdater.RESTORED")." ]";
         return true;
+    }
+
+
+    private function print($text) {
+        echo $text;
+        flush();
+        ob_flush();
+    }
+    private function println($text) {
+        $this->print($text . '<br />');
     }
 }
