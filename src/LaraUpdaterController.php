@@ -68,6 +68,13 @@ class LaraUpdaterController extends Controller
             $status = $this->install($lastVersionInfo['version'], $update_path, $lastVersionInfo['archive']);
 
             if($status){
+                 if( config('laraupdater.migrate')==true ) {
+                    try {
+                        Artisan::call('migrate');
+                    }catch(Exception $e) {
+                        throw new \Exception(trans("laraupdater.Error_during_download."));
+                    }
+                }
                 $this->setCurrentVersion($lastVersionInfo['version']); //update system version
                 Artisan::call('up'); //restore system UP status
                 echo '<p>&raquo; '.trans("laraupdater.SYSTEM_Mantence_Mode").' => '.trans("laraupdater.OFF").'</p>';
