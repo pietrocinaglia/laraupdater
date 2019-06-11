@@ -28,4 +28,9 @@
 		* Generally, ADMIN have user_id=1; set FALSE to disable this check (not recommended)
 		*/
 		'allow_users_id' => [1] 
+		
+		 /*
+		*  Laravel migrate settings
+		*/
+		'migrate' => true
 	];
