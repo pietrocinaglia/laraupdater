@@ -199,7 +199,7 @@ class LaraUpdaterController extends Controller
     public function getCurrentVersion(){
         // todo: env file version
         $version = File::get(base_path().'/version.txt');
-        return $version;
+        return trim($version);
     }
 
     /*
