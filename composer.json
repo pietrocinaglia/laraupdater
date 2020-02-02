@@ -32,10 +32,10 @@
         }
     },
     "extra":{
-                "laravel":{
-                    "providers":[
-                        "pcinaglia\\laraupdater\\LaraUpdaterServiceProvider"
-                    ]
-                }
+        "laravel":{
+            "providers":[
+                "pcinaglia\\laraupdater\\LaraUpdaterServiceProvider"
+            ]
+        }
     }
 }
