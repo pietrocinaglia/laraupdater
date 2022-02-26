@@ -175,7 +175,7 @@ class LaraUpdaterController extends Controller
     private function download($update_name)
     {
         try{
-            $filename_tmp = config('laraupdater.tmp_path').'/'.$update_name;
+            $filename_tmp = base_path().config('laraupdater.tmp_path').'/'.$update_name;
 
             if ( !is_file( $filename_tmp ) ) {
                 $newUpdate = file_get_contents(config('laraupdater.update_baseurl').'/'.$update_name);
