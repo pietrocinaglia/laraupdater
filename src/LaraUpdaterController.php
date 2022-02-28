@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\File;
 use Artisan;
 use Auth;
 use ZipArchive;
+use Illuminate\Support\Facades\Cache;
 
 class LaraUpdaterController extends Controller
 {
@@ -157,6 +158,7 @@ class LaraUpdaterController extends Controller
             File::delete($update_path); //clean TMP
             File::deleteDirectory($this->tmp_backup_dir); //remove backup temp folder
             File::deleteDirectory($extract_tmp_path); //remove zip temp folder
+            Cache::forget('laraupdater_lastversion');
 
         } catch (\Exception $e) { return false; }
 
@@ -208,12 +210,26 @@ class LaraUpdaterController extends Controller
         return '';
     }
 
+    /*
+    * Get the update description.
+    */
+    public function getDescription()
+    {
+        $lastVersionInfo = $this->getLastVersion();
+        if( version_compare($lastVersionInfo['version'], $this->getCurrentVersion(), ">") )
+            return $lastVersionInfo['description'];
+
+        return '';
+    }
+
     private function setCurrentVersion($last){
         File::put(base_path().'/version.txt', $last); //UPDATE $current_version to last version
     }
 
     private function getLastVersion(){
-        $content = file_get_contents(config('laraupdater.update_baseurl').'/laraupdater.json');
+        $content = Cache::remember('laraupdater_lastversion', (config('laraupdater.version_check_time') * 60), function () {
+            return file_get_contents(config('laraupdater.update_baseurl').'/laraupdater.json');
+        });
         $content = json_decode($content, true);
         return $content; //['version' => $v, 'archive' => 'RELEASE-$v.zip', 'description' => 'plain text...'];
     }

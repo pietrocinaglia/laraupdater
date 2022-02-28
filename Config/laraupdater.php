@@ -32,5 +32,10 @@
 		 /*
 		*  Laravel migrate settings
 		*/
-		'migrate' => true
+		'migrate' => true,
+		/*
+		* Set the update check time period, to prevent update server overload.
+		* Set the number in minutes
+		*/
+		'version_check_time' => 15,
 	];
