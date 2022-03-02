@@ -18,7 +18,8 @@ class LaraUpdaterController extends Controller
 
     private $tmp_backup_dir = null;
 
-    private function checkPermission(){
+    private function checkPermission() 
+    {
 
         if( config('laraupdater.allow_users_id') !== null ){
 
@@ -171,6 +172,9 @@ class LaraUpdaterController extends Controller
     private function download($update_name)
     {
         try{
+            if(!file_exists(base_path().config('laraupdater.tmp_path'))) {
+                File::makeDirectory(base_path().config('laraupdater.tmp_path'), 0750);
+            }
             $filename_tmp = base_path().config('laraupdater.tmp_path').'/'.$update_name;
 
             if ( !is_file( $filename_tmp ) ) {
