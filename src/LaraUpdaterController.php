@@ -209,7 +209,7 @@ class LaraUpdaterController extends Controller
     {
         $lastVersionInfo = $this->getLastVersion();
         if( version_compare($lastVersionInfo['version'], $this->getCurrentVersion(), ">") )
-            return $lastVersionInfo['version'];
+            return $lastVersionInfo; // Return full array so we can display change log in notification
 
         return '';
     }
