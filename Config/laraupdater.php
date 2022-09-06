@@ -23,14 +23,8 @@ return [
 	'middleware' => ['web', 'auth'],
 
 	/*
-	* Set which users can perform an update; 
-	* This parameter accepts: ARRAY(user_id) ,or FALSE => for example: [1]  OR  [1,3,0]  OR  false
-	* Generally, ADMIN have user_id=1; set FALSE to disable this check (not recommended)
+	* Set the update check time period, to prevent update server overload.
+	* Set the number in minutes
 	*/
-	'allow_users_id' => [1],
-	
-    /*
-	*  Laravel migrate settings
-	*/
-	'migrate' => true
+	'version_check_time' => 15,
 ];

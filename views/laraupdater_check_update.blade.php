@@ -27,9 +27,10 @@
             type: 'GET',
             url: 'updater.check',
             async: false,
-            success: function (response) {
-                if (response != '') {
-                    $('#update_notification').append('<strong>{{trans("laraupdater.Update_Available")}} <span class="badge badge-pill badge-info">v.' + response + '</span></strong><a role="button"  onclick="update()"  class="btn btn-sm btn-info pull-right update-btn">{{trans("laraupdater.Update_Now")}}</a>');
+            success: function(response) {
+                if(response != ''){
+                    $('#update_notification').append('<strong>{{trans("laraupdater.Update_Available")}} <span class="badge badge-pill badge-info">v.'+response['version']+'</span></strong> <a role="button"  onclick="update()"  class="btn btn-sm btn-info pull-right update-btn">{{trans("laraupdater.Update_Now")}}</a>');
+                    $('#update_notification').append('<br ><strong>{{trans("laraupdater.CHANGELOG")}} : '+response['description']+'</strong> '); // Display change log in notification
                     $('#update_notification').show();
                 }
             }
