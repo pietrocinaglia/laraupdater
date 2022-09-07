@@ -4,7 +4,7 @@
 
 # LaraUpdater [ self-update for your Laravel App ]
 
-LaraUpdater allows your Laravel Application to auto-update itself ! ;)
+LaraUpdater allows your Laravel application to auto-update itself ! ;)
 
 When you release an application is most important maintain it; therefore, could be necessary to publish an update for bugs fixing as well as for new features implementation.
 
@@ -14,16 +14,12 @@ WITHOUT LaraUpdate => Do you want to contact them one by one and send them the u
 
 #### WITH LaraUpdater => Let your application (ALONE) detects that a new update is available and notifies its presence to the administrator; furthermore, let your application install it and handles all related steps.
 
+
 ### NEW VERSION change-log 
-[ thanks to salihkiraz :) ]
-- multi lang. supported
-- sample views add
-- laravel package auto discover added
-- laravel 5.7 tested
-- zip file extract fixed
+- Now it supports Laravel 8 and 9;
+- New view based on Bootstrap 5;
+- Bugs Fix.
 
-
-![alt text](readme_files/cover.png "LaraUpdater")
 
 ## Features:
 
@@ -40,8 +36,12 @@ You can set which users  (e.g. only the admin) can perform an update for the app
 #### > Fault tolerant
 During the update LaraUpdate BACKUPS all files that are overwritten, so if an error occurs it can try to restore automatically the previous state. If the restoring fails, you can use the backup stored in the root of your system for a manual maintenance.
 
-#### > Supports UPGRADE script
+#### > Supports PHP script
 LaraUpdate can import a PHP script to perform custom actions (e.g. create a table in database after the update); the commands are performed in the last step of update.
+
+#### > Backup/Recovery Integrated
+
+#### > Multi-language
 
 
 ## Getting Started
@@ -50,8 +50,8 @@ These instructions will get you a copy of the project up and running on your ser
 
 ### Prerequisites
 
-LaraUpdater has been tested using Laravel 5.4
-Recommended Laravel Version >= 5.x
+LaraUpdater has been tested using Laravel 8/9
+Recommended Laravel Version >= 8
 
 
 ## Installing
@@ -83,14 +83,19 @@ When it is published you can manage the configuration of LaraUpdater through the
 
 ```
     /*
-    * Temp folder to store update before to install it.
+    * Temporary folder to store update before to install it.
     */
-    'tmp_path' => '/../tmp',
+    'tmp_folder_name' => 'tmp',
+
+    /*
+    * Script's filename called during the update.
+    */
+    'script_filename' => 'upgrade.php',
 
     /*
     * URL where your updates are stored ( e.g. for a folder named 'updates', under http://site.com/yourapp ).
     */
-    'update_baseurl' => 'http://site.com/yourapp/updates',
+    'update_baseurl' => 'http://localhost:8888/update',
 
     /*
     * Set a middleware for the route: updater.update
@@ -112,7 +117,7 @@ For example, create a .txt file that contains only:
 ```
 1.0
 ```
-...use only 1 row, the first, of the .txt file.
+Use only 1 row, the first, of the .txt file.
 When release an update this files is updated from LaraUpdate.
 
 
@@ -129,9 +134,10 @@ This file must contain a function named `main()` with a boolean return (to pass 
 
 function main(){
 
-	command-1-to-connect-db
-	command-2-to-create-table
-	command-3-to-insert-data
+	example:
+        command-1-to-connect-db
+	    command-2-to-create-table
+	    command-3-to-insert-data
 	
 	return true;
 }
@@ -188,39 +194,17 @@ This route is protected using the information under `'allow_users_id'` in `confi
 I suggest, to not use directly these routes BUT to show an Alert when an update is available; the Alert could be contain a Button to perform the update, see the solution below:
 
 
-### (Example) Bootstrap 4 and JQuery solution
+### Notification popup by using Bootstrap 5 and JQuery (included)
 
 ![alt text](readme_files/preview1.png "Alert with Update Button")
 
-Add to `view/layout/app.blade.php` this HTML code (I suggest immediately before of `@yield('content')`):
+Add to `resources/view/layout/app.blade.php` this code to load the view included in LaraUpdater (I suggest immediately before of `@yield('content')`):
 ```
-<div id="update_notification" style="display:none;" class="alert alert-info">
-	<button type="button" style="margin-left: 20px" class="close" data-dismiss="alert" aria-label="Close">
-		<span aria-hidden="true">&times;</span>
-	</button>
-</div>            
+@include('vendor.laraupdater.notification')       
 ```
 
-, now add (at the end of `view/layout/app.blade.php`) this JQuery script:    
-```
-<script>
-    $(document).ready(function() {  
-        $.ajax({
-            type: 'GET',   
-            url: 'updater.check',
-            async: false,
-            success: function(response) {
-                if(response != ''){
-                    $('#update_notification').append('<strong>Update Available <span class="badge badge-pill badge-info">v. '+response+'</span></strong><a role="button" href="updater.update" class="btn btn-sm btn-info pull-right">Update Now</a>');
-                    $('#update_notification').show();
-                }
-            }
-        });
-    });
-</script>
-```
+TEST: publish an update and refresh the page to show the alert :-)
 
-<< END >> ...to test it: publish an update and refresh the page to show the alert :-)
 
 ## License
 

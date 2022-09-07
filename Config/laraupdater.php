@@ -7,14 +7,19 @@
 	return [
 
 		/*
-		* Temp folder to store update before to install it.
+		* Temporary folder to store update before to install it.
 		*/
-		'tmp_path' => '/../tmp',
+		'tmp_folder_name' => 'tmp',
+
+		/*
+		* Script's filename called during the update.
+		*/
+		'script_filename' => 'upgrade.php',
 
 		/*
 		* URL where your updates are stored ( e.g. for a folder named 'updates', under http://site.com/yourapp ).
 		*/
-		'update_baseurl' => 'http://site.com/yourapp/updates',
+		'update_baseurl' => 'http://localhost:8888/update',
 
 		/*
 		* Set a middleware for the route: updater.update
