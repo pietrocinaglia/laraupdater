@@ -77,7 +77,7 @@ class LaraUpdaterController extends Controller {
             $this->setCurrentVersion($last_version_info['version']); //update system version
             $this->log( trans("laraupdater.INSTALLATION_SUCCESS"), true, 'info' );
 
-            $this->log( trans("laraupdater.SYSTEM_VERSION") . $this->getCurrentVersion, true, 'info' );
+            $this->log( trans("laraupdater.SYSTEM_VERSION") . $this->getCurrentVersion(), true, 'info' );
 
             Artisan::call('up'); // Maintenance mode OFF
             $this->log( trans("laraupdater.MAINTENANCE_MODE_OFF"), true, 'info' );
@@ -226,6 +226,7 @@ class LaraUpdaterController extends Controller {
         if( !isset($this->tmp_backup_dir) )
             $this->tmp_backup_dir = base_path().'/backup_'.date('Ymd');
 
+        $backup_dir = $this->tmp_backup_dir;
         if ( !is_dir($backup_dir) )
             File::makeDirectory($backup_dir, $mode = 0755, true, true);
 
