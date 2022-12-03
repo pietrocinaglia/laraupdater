@@ -45,8 +45,8 @@ class LaraUpdaterController extends Controller {
     * Download and Install Update.
     */
     public function update()
-    {   
-        $this->log( trans("laraupdater.SYSTEM_VERSION") . $this->getCurrentVersion, true, 'info' );
+    {
+        $this->log( trans("laraupdater.SYSTEM_VERSION") . $this->getCurrentVersion(), true, 'info' );
 
         if( ! $this->checkPermission() ){
             $this->log( trans("laraupdater.PERMISSION_DENIED."), true, 'warn' );
@@ -90,11 +90,11 @@ class LaraUpdaterController extends Controller {
 
     private function install($archive)
     {
-        try{            
+        try{
             $execute_commands = false;
             $update_script = base_path().'/'.config('laraupdater.tmp_folder_name').'/'.config('laraupdater.script_filename');
 
-            $zipHandle = zip_open($update_path);
+            $zipHandle = zip_open($archive);
             $archive = substr($archive,0, -4);
 
             $this->log( trans("laraupdater.CHANGELOG"), true, 'info' );
@@ -103,7 +103,7 @@ class LaraUpdaterController extends Controller {
                 $filename = zip_entry_name($zip_item);
                 $dirname = dirname($filename);
 
-                // Exclude files 
+                // Exclude files
                 if(	substr($filename,-1,1) == '/' || dirname($filename) === $archive || substr($dirname,0,2) === '__') continue;
                 if($dirname === '.' ) continue;
 
@@ -129,7 +129,7 @@ class LaraUpdaterController extends Controller {
                             $this->log( trans("laraupdater.FILE_EXIST") . $filename, true, 'info' );
                             $this->backup($filename); //backup current version
                         }
-                        
+
                         $this->log( trans("laraupdater.FILE_COPIED") . $filename, true, 'info' );
 
                         File::put(base_path().'/'.$filename, $contents);
@@ -149,7 +149,7 @@ class LaraUpdaterController extends Controller {
                 $this->log( trans("laraupdater.EXECUTE_UPDATE_SCRIPT") . ' (\'upgrade.php\')', true, 'info' );
             }
 
-            File::delete($update_path);
+            File::delete($archive);
             File::deleteDirectory($this->tmp_backup_dir);
             $this->log( trans("laraupdater.TEMP_CLEANED"), true, 'info' );
 
@@ -164,18 +164,18 @@ class LaraUpdaterController extends Controller {
     /*
     * Download Update from $update_baseurl to $tmp_folder_name (local folder).
     */
-    private function download($filename) {   
+    private function download($filename) {
         $this->log( trans("laraupdater.DOWNLOADING"), true, 'info' );
 
         $tmp_folder_name = base_path().'/'.config('laraupdater.tmp_folder_name');
 
         if ( !is_dir($tmp_folder_name) )
             File::makeDirectory($tmp_folder_name, $mode = 0755, true, true);
-            
+
         try{
             $local_file = $tmp_folder_name.'/'.$filename;
             $remote_file_url = config('laraupdater.update_baseurl').'/'.$filename;
-            
+
             $update = file_get_contents($remote_file_url);
             file_put_contents($local_file, $update);
 
