@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'b6ac6e2314927d3612ab96d2b2a683cb0f4289af',
+    'reference' => '83ff0b79beb207054a0bb4297e45602e1bfc31bf',
     'name' => 'pcinaglia/laraupdater',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'b6ac6e2314927d3612ab96d2b2a683cb0f4289af',
+      'reference' => '83ff0b79beb207054a0bb4297e45602e1bfc31bf',
     ),
   ),
 );
