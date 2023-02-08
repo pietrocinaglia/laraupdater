@@ -29,6 +29,10 @@ class UpdateHelper
         } else {
             return;
         }
+
+        if (app()->runningInConsole()) {
+            dump($header . '[err]' . $msg);
+        }
     }
 
     /*
