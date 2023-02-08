@@ -15,7 +15,8 @@ WITHOUT LaraUpdate => Do you want to contact them one by one and send them the u
 #### WITH LaraUpdater => Let your application (ALONE) detects that a new update is available and notifies its presence to the administrator; furthermore, let your application install it and handles all related steps.
 
 
-### NEW VERSION change-log 
+### NEW VERSION change-log
+- Now it can run from artisan command
 - Now it supports Laravel 8 and 9;
 - New view based on Bootstrap 5;
 - Bugs Fix.
@@ -42,6 +43,8 @@ LaraUpdate can import a PHP script to perform custom actions (e.g. create a tabl
 #### > Backup/Recovery Integrated
 
 #### > Multi-language
+
+#### > Access from web interface or console
 
 
 ## Getting Started
@@ -104,11 +107,11 @@ When it is published you can manage the configuration of LaraUpdater through the
     'middleware' => ['web', 'auth'],
 
     /*
-    * Set which users can perform an update; 
+    * Set which users can perform an update;
     * This parameter accepts: ARRAY(user_id) ,or FALSE => for example: [1]  OR  [1,3,0]  OR  false
     * Generally, ADMIN have user_id=1; set FALSE to disable this check (not recommended)
     */
-    'allow_users_id' => [1] 
+    'allow_users_id' => [1]
 ```
 
 #### 3) Create version.txt
@@ -138,7 +141,7 @@ function main(){
         command-1-to-connect-db
 	    command-2-to-create-table
 	    command-3-to-insert-data
-	
+
 	return true;
 }
 ?>
@@ -163,7 +166,7 @@ Create a file named `laraupdater.json` like this:
 
 Upload `laraupdater.json` and .zip Archive in the same folder of your server (the one that will host the update).
 
-	
+
 #### 4) Configure your application
 
 Set the server that will host the update in `config/laraupdater.php` (see Installing):
@@ -178,18 +181,17 @@ set `'update_baseurl'` as follows: `'update_baseurl' => 'http://yoursites.com/up
 
 ## Usage
 
-LaraUpdater implements three main methods that you can call using the routes:
+LaraUpdater implements three main methods that you can call using the web routes or artisan command:
 
-#### updater.check
+#### updater.check, laraupdater:check
 Returns '' (an update not exist) OR $version (e.g. 1.0.2, if an update exist).
 
-#### updater.currentVersion
+#### updater.currentVersion, laraupdater:current-version
 Returns the current version of your App (from `version.txt`).
 
-#### updater.update
+#### updater.update, laraupdater:update
 It downloads and installs the last update available.
-This route is protected using the information under `'allow_users_id'` in `config/laraupdater.php`
-
+This web route is protected using the information under `'allow_users_id'` in `config/laraupdater.php`
 
 I suggest, to not use directly these routes BUT to show an Alert when an update is available; the Alert could be contain a Button to perform the update, see the solution below:
 
@@ -200,7 +202,7 @@ I suggest, to not use directly these routes BUT to show an Alert when an update 
 
 Add to `resources/view/layout/app.blade.php` this code to load the view included in LaraUpdater (I suggest immediately before of `@yield('content')`):
 ```
-@include('vendor.laraupdater.notification')       
+@include('vendor.laraupdater.notification')
 ```
 
 TEST: publish an update and refresh the page to show the alert :-)
