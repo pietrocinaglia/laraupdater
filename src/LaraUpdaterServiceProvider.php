@@ -8,6 +8,7 @@ namespace pcinaglia\laraupdater;
 
 use Illuminate\Support\ServiceProvider;
 use pcinaglia\laraupdater\Commands\CommandCheck;
+use pcinaglia\laraupdater\Commands\CommandCurrentVersion;
 use pcinaglia\laraupdater\Commands\CommandUpdate;
 
 class LaraUpdaterServiceProvider extends ServiceProvider
@@ -27,7 +28,8 @@ class LaraUpdaterServiceProvider extends ServiceProvider
         $this->commands(
             [
                 CommandUpdate::class,
-                CommandCheck::class
+                CommandCheck::class,
+                CommandCurrentVersion::class
             ]
         );
     }
