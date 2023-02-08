@@ -3,7 +3,9 @@
 namespace pcinaglia\laraupdater\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use pcinaglia\laraupdater\Helpers\UpdateHelper;
 use Symfony\Component\Console\Input\InputArgument;
 
 class CommandUpdate extends Command
@@ -27,6 +29,8 @@ class CommandUpdate extends Command
      */
     public function handle(): int
     {
+        $updateHelper = new UpdateHelper();
+        $updateHelper->update();
         return 0;
     }
 
