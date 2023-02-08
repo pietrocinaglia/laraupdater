@@ -32,14 +32,15 @@ class LaraUpdaterController extends Controller
     */
     public function update()
     {
-        $this->log(trans("laraupdater.SYSTEM_VERSION") . $this->getCurrentVersion(), true, 'info');
+
+        $updateHelper = new UpdateHelper();
+        $updateHelper->log(trans("laraupdater.SYSTEM_VERSION") . $this->getCurrentVersion(), true, 'info');
 
         if (!$this->checkPermission()) {
-            $this->log(trans("laraupdater.PERMISSION_DENIED."), true, 'warn');
+            $updateHelper->log(trans("laraupdater.PERMISSION_DENIED."), true, 'warn');
             return;
         }
 
-        $updateHelper = new UpdateHelper();
         return $updateHelper->update();
     }
 

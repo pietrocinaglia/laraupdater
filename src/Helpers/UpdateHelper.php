@@ -12,7 +12,7 @@ class UpdateHelper
     private $tmp_backup_dir = null;
     private $response_html = '';
 
-    private function log($msg, $append_response = false, $type = 'info')
+    public function log($msg, $append_response = false, $type = 'info')
     {
         //Response HTML
         if ($append_response) {
@@ -31,7 +31,9 @@ class UpdateHelper
         }
 
         if (app()->runningInConsole()) {
-            dump($header . '[err]' . $msg);
+            dump($header . ' - ' . $msg);
+        } else {
+            echo ($header . ' - ' . $msg . "<br/>");
         }
     }
 
@@ -63,6 +65,7 @@ class UpdateHelper
                 $this->log(trans("laraupdater.INSTALLATION_ERROR"), true, 'err');
                 return;
             }
+
             $this->setCurrentVersion($last_version_info['version']); //update system version
             $this->log(trans("laraupdater.INSTALLATION_SUCCESS"), true, 'info');
 
@@ -132,7 +135,6 @@ class UpdateHelper
                 }
             }
             zip_close($zipHandle);
-            echo '</ul>';
 
             if ($execute_commands == true) {
                 include_once $update_script;
