@@ -95,7 +95,8 @@ class UpdateHelper
                 if (substr($filename, -1, 1) == '/' || dirname($filename) === $archive || substr($dirname, 0, 2) === '__') {
                     continue;
                 }
-                if ($dirname === '.') {
+
+                if (strpos($filename, 'version.txt') !== false) {
                     continue;
                 }
 
