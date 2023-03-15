@@ -91,16 +91,20 @@ class UpdateHelper
             $execute_commands = false;
             $update_script = base_path() . '/' . config('laraupdater.tmp_folder_name') . '/' . config('laraupdater.script_filename');
 
-            $zipHandle = zip_open($archive);
-            $archive = substr($archive, 0, -4);
 
-            $this->log(trans("laraupdater.CHANGELOG"), true, 'info');
+            $zip = new ZipArchive();
+            if ($zip->open($archive)) {
+                $archive = substr($archive, 0, -4);
+                $this->log(trans("laraupdater.CHANGELOG"), true, 'info');
+            }
 
-            while ($zip_item = zip_read($zipHandle)) {
-                $filename = zip_entry_name($zip_item);
+
+            for ($indexFile = 0; $indexFile < $zip->numFiles; $indexFile++) {
+                $filename = $zip->getNameIndex($indexFile);
                 $dirname = dirname($filename);
 
                 // Exclude files
+
                 if (substr($filename, -1, 1) == '/' || dirname($filename) === $archive || substr($dirname, 0, 2) === '__') {
                     continue;
                 }
@@ -111,36 +115,31 @@ class UpdateHelper
 
                 if (substr($dirname, 0, strlen($archive)) === $archive) {
                     $dirname = substr($dirname, (strlen($dirname) - strlen($archive) - 1) * (-1));
-                }
+                };
+
 
                 $filename = $dirname . '/' . basename($filename); //set new purify path for current file
 
                 if (!is_dir(base_path() . '/' . $dirname)) { //Make NEW directory (if exist also in current version continue...)
-                    File::makeDirectory(base_path() . '/' . $dirname, $mode = 0755, true, true);
+                    File::makeDirectory(base_path() . '/' . $dirname, 0755, true, true);
                     $this->log(trans("laraupdater.DIRECTORY_CREATED") . $dirname, true, 'info');
                 }
 
                 if (!is_dir(base_path() . '/' . $filename)) { //Overwrite a file with its last version
-                    $contents = zip_entry_read($zip_item, zip_entry_filesize($zip_item));
+                    $contents = $zip->getFromIndex($indexFile);
                     $contents = str_replace("\r\n", "\n", $contents);
-
-                    if (strpos($filename, 'upgrade.php') !== false) {
-                        File::put($update_script, $contents);
-                        $execute_commands = true;
-                    } else {
-                        if (File::exists(base_path() . '/' . $filename)) {
-                            $this->log(trans("laraupdater.FILE_EXIST") . $filename, true, 'info');
-                            $this->backup($filename); //backup current version
-                        }
-
-                        $this->log(trans("laraupdater.FILE_COPIED") . $filename, true, 'info');
-
-                        File::put(base_path() . '/' . $filename, $contents);
-                        unset($contents);
+                    if (File::exists(base_path() . '/' . $filename)) {
+                        $this->log(trans("laraupdater.FILE_EXIST") . $filename, true, 'info');
+                        $this->backup($filename); //backup current version
                     }
+
+                    $this->log(trans("laraupdater.FILE_COPIED") . $filename, true, 'info');
+
+                    File::put(base_path() . '/' . $filename, $contents);
+                    unset($contents);
                 }
             }
-            zip_close($zipHandle);
+            $zip->close();
 
             if ($execute_commands == true) {
                 include_once $update_script;
