@@ -18,6 +18,11 @@
             "name": "Pietro Cinaglia",
             "homepage": "https://github.com/pietrocinaglia",
             "role": "Software Engineer."
+        },
+        {
+            "name": "Mohamad Supangat",
+            "homepage": "https://github.com/mohamad-supangat",
+            "role": "Software Engineer."
         }
     ],
     "minimum-stability": "dev",
@@ -39,3 +44,4 @@
                 }
     }
 }
+
