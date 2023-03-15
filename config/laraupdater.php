@@ -9,7 +9,7 @@ return [
     /*
     * Temporary folder to store update before to install it.
     */
-    'tmp_folder_name' => 'tmp',
+    'tmp_folder_name' => 'storage/app/laraupdater/tmp_update',
 
     /*
     * Script's filename called during the update.

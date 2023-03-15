@@ -12,6 +12,12 @@ class UpdateHelper
     private $tmp_backup_dir = null;
     private $response_html = '';
 
+
+    private function initTmpBackupDir()
+    {
+        $this->tmp_backup_dir = storeage_path('app/laraupdater') . '/backup_' . date('Ymd');
+    }
+
     public function log($msg, $append_response = false, $type = 'info')
     {
         //Response HTML
@@ -225,7 +231,7 @@ class UpdateHelper
     private function backup($filename)
     {
         if (!isset($this->tmp_backup_dir)) {
-            $this->tmp_backup_dir = base_path() . '/backup_' . date('Ymd');
+            $this->initTmpBackupDir();
         }
 
         $backup_dir = $this->tmp_backup_dir;
@@ -247,8 +253,8 @@ class UpdateHelper
     {
         $this->log(trans("laraupdater.RECOVERY") . '<small>' . $e . '</small>', true, 'info');
 
-        if (!isset($this->tmp_backup_dir)) {
-            $this->tmp_backup_dir = base_path() . '/backup_' . date('Ymd');
+        if (!isset($this->tmp_backup_dir)) {;
+            $this->initTmpBackupDir();
             $this->log(trans("laraupdater.BACKUP_FOUND") . '<small>' . $this->tmp_backup_dir . '</small>', true, 'info');
         }
 
