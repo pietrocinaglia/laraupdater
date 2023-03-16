@@ -15,7 +15,7 @@ class UpdateHelper
 
     private function initTmpBackupDir()
     {
-        $this->tmp_backup_dir = storeage_path('app/laraupdater') . '/backup_' . date('Ymd');
+        $this->tmp_backup_dir = storage_path('app/laraupdater') . '/backup_' . date('Ymd');
     }
 
     public function log($msg, $append_response = false, $type = 'info')
@@ -92,12 +92,13 @@ class UpdateHelper
             $update_script = base_path() . '/' . config('laraupdater.tmp_folder_name') . '/' . config('laraupdater.script_filename');
 
 
-            $zip = new ZipArchive();
+            $zip = new \ZipArchive();
             if ($zip->open($archive)) {
                 $archive = substr($archive, 0, -4);
 
                 // check if upgrade_scipr exist
                 $update_script_content = $zip->getFromName(config('laraupdater.script_filename'));
+                print($update_script_content);
                 if ($update_script_content) {
                     File::put($update_script, $update_script_content);
 
