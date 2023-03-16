@@ -10,7 +10,8 @@
     ],
     "homepage": "https://github.com/pietrocinaglia/laraupdater",
     "require": {
-        "php": ">=7.0.0"
+        "php": ">=7.0.0 || ^8.0",
+        "illuminate/support": "^8.28 || ^9.0 || ^10.0"
     },
     "license": "MIT",
     "authors": [
@@ -36,12 +37,11 @@
             "pcinaglia\\laraupdater\\": "src"
         }
     },
-    "extra":{
-                "laravel":{
-                    "providers":[
-                        "pcinaglia\\laraupdater\\LaraUpdaterServiceProvider"
-                    ]
-                }
+    "extra": {
+        "laravel": {
+            "providers": [
+                "pcinaglia\\laraupdater\\LaraUpdaterServiceProvider"
+            ]
+        }
     }
 }
-
