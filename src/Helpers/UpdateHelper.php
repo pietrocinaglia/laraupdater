@@ -82,6 +82,9 @@ class UpdateHelper
         } catch (\Exception $e) {
             $this->log(trans("laraupdater.EXCEPTION") . '<small>' . $e->getMessage() . '</small>', true, 'err');
             $this->recovery();
+
+            // up laravel after recovery on error
+            Artisan::call('up');
         }
     }
 
