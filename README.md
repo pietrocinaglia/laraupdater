@@ -1,6 +1,8 @@
-## Author
+## Author and Contributor
 
-- **Pietro Cinaglia** - Contact me using [GitHub](https://github.com/pietrocinaglia) or [LinkedIn](https://linkedin.com/in/pietrocinaglia)
+- **Pietro Cinaglia** - Original Author - Contact using [GitHub](https://github.com/pietrocinaglia) or [LinkedIn](https://linkedin.com/in/pietrocinaglia)
+
+- **Aura Komputer** - Contact using [GitHub](https://github.com/aurakomputer)
 
 # LaraUpdater [ self-update for your Laravel App ]
 
