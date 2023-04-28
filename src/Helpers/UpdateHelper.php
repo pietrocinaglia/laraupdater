@@ -229,7 +229,7 @@ class UpdateHelper
     {
         $last_version = $this->getLastVersion();
         if (version_compare($last_version['version'], $this->getCurrentVersion(), ">")) {
-            return $last_version;
+            return $last_version['version'];
         }
         return '';
     }
