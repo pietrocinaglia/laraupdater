@@ -1,9 +1,3 @@
-## Author and Contributor
-
-- **Pietro Cinaglia** - Original Author - Contact using [GitHub](https://github.com/pietrocinaglia) or [LinkedIn](https://linkedin.com/in/pietrocinaglia)
-
-- **Aura Komputer** - Contact using [GitHub](https://github.com/aurakomputer)
-
 # LaraUpdater [ self-update for your Laravel App ]
 
 LaraUpdater allows your Laravel application to auto-update itself ! ;)
@@ -232,6 +226,16 @@ Add to `resources/view/layout/app.blade.php` this code to load the view included
 ```
 
 TEST: publish an update and refresh the page to show the alert :-)
+
+
+## Author
+
+- **Pietro Cinaglia** - Original Author - Contact using [GitHub](https://github.com/pietrocinaglia) or [LinkedIn](https://linkedin.com/in/pietrocinaglia)
+
+### Contributors
+
+- **Aura Komputer** - Contact using [GitHub](https://github.com/aurakomputer)
+
 
 ## License
 
